@@ -14,30 +14,30 @@ local MasVibrate = {}
 
 --[]--[]-- SETTINGS --[]--[]--
 MasVibrate.Settings = {
-    Enabled = true,          -- Master switch to enable/disable all vibrations
-    DefaultIntensity = 1,    -- Used if no intensity is specified
-    DefaultDuration = 0.5,   -- Used if no duration is specified
-    MinIntensity = 0.1,      -- Lower clamp for any custom intensity
-    MaxIntensity = 10,       -- Upper clamp for any custom intensity
-    IntensityStep = 0.1,     -- Can be used by UIs or incremental adjustments
+    Enabled = true,          
+    DefaultIntensity = 1,    
+    DefaultDuration = 0.5,   
+    MinIntensity = 0.1,      
+    MaxIntensity = 10,       
+    IntensityStep = 0.1,
 
-    SmoothingEnabled = false,-- If true, uses a smooth transition approach
-    SmoothingSpeed = 0.05,   -- Speed factor for smoothing transitions
-    FadeInEnabled = false,   -- If true, adds a fade-in effect
-    FadeInDuration = 0.2,    -- Duration for fade-in
-    FadeOutEnabled = false,  -- If true, adds a fade-out effect
-    FadeOutDuration = 0.3,   -- Duration for fade-out
-    PatternSpeed = 1,        -- Speed multiplier for pattern-based vibrations
+    SmoothingEnabled = false,
+    SmoothingSpeed = 0.05,
+    FadeInEnabled = false,
+    FadeInDuration = 0.2,
+    FadeOutEnabled = false,
+    FadeOutDuration = 0.3,
+    PatternSpeed = 1,
 
     Balance = {
-        Enabled = true,  -- Splits intensity across left and right motors if true
-        Intensity = 1,   -- Extra factor applied to balanced intensities
-        Sway = 0.5       -- 0 = all left motor, 1 = all right motor, 0.5 = equal split
+        Enabled = true,
+        Intensity = 1,
+        Sway = 0.5
     }
 }
 
 --[]--[]-- DEPENDENCIES --[]--[]--
-local Modules = require(script:WaitForChild('Modules'))
+local Modules = require(script:WaitForChild("Modules"))
 
 --[]--[]-- CONFIGURE --[]--[]--
 function MasVibrate:Configure(settingsTable)
@@ -99,13 +99,13 @@ end
 
 --[]--[]-- PLUGIN HANDLER --[]--[]--
 function MasVibrate:Plugin(pluginName, command, ...)
-    local actualName = pluginName
-    if pluginName:match("^Plugin%-") then
-        actualName = pluginName:gsub("^Plugin%-", "")
-    elseif pluginName:match("^Plugin/") then
-        actualName = pluginName:gsub("^Plugin/", "")
+    local pluginFolder = script:WaitForChild("Plugins")
+    local pluginModule = require(pluginFolder:WaitForChild(pluginName))
+    if pluginModule and pluginModule[command] then
+        pluginModule[command](pluginModule, ...)
+    else
+        warn("[MasVibrate] No method '" .. tostring(command) .. "' found in plugin:", pluginName)
     end
-    -- warn("[MasVibrate] Plugin invoked. Name:", actualName, "Command:", command, "Vars:", ...)
 end
 
 return MasVibrate

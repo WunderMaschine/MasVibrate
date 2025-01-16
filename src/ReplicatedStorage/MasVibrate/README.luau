@@ -38,7 +38,7 @@ Below is an overview of how each part works, presented clearly so you can adapt 
   - Uses parameters like Sway, Intensity and Duration to give a realistic, split feel.
   - Kicks in when Balance.Enabled is true.
 
-• Plugins (e.g., Plugin-Character, Plugin-Sound, Plugin-Example):
+• Plugins (e.g., -Character, Sound, Example):
   - Extend MasVibrate’s functionality. Each plugin provides Trigger (to execute its logic) 
     and Stop (to halt effects).
   - Useful for adding targeted features like character-based or sound-based vibrations.
@@ -125,4 +125,4 @@ EasyVibration's github link: https://github.com/WunderMaschine/EasyVibration
 --------------------------------------------------------------------------------
 --]]
 
-return 'V0.2'
+return 'V0.4'

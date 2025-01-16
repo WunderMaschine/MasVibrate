@@ -9,7 +9,7 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 local fallStartY = nil
 local wasFalling = false
 
--- Detect jump via Humanoid.Jumping
+-- Jump event
 humanoid.Jumping:Connect(function(isActive)
     if isActive then
         local jumpPower = humanoid.JumpPower or 50
@@ -21,14 +21,12 @@ humanoid.Jumping:Connect(function(isActive)
     end
 end)
 
--- Detect falling via StateChanged
+-- Fall event
 humanoid.StateChanged:Connect(function(oldState, newState)
     if newState == Enum.HumanoidStateType.Freefall then
-        -- Begin tracking fall
         fallStartY = rootPart.Position.Y
         wasFalling = true
     elseif wasFalling then
-        -- Once we were falling, detect if we've landed or changed state
         if newState == Enum.HumanoidStateType.Landed
         or newState == Enum.HumanoidStateType.Running
         or newState == Enum.HumanoidStateType.Walking
