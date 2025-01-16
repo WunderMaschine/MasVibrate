@@ -1,51 +1,44 @@
---[[Hi!
-  __  __        __   ___ _             _       
- |  \/  |__ _ __\ \ / (_) |__ _ _ __ _| |_ ___ 
- | |\/| / _` (_-<\ V /| | '_ \ '_/ _` |  _/ -_)
- |_|  |_\__,_/__/ \_/ |_|_.__/_| \__,_|\__\___|
-I recommend reading the README and the documentation before using this module]]
+--[[
+  __  __        __      ___ _               _       
+ |  \/  |       \ \    / (_) |             | |      
+ | \  / | __ _ __\ \  / / _| |__  _ __ __ _| |_ ___ 
+ | |\/| |/ _` / __\ \/ / | | '_ \| '__/ _` | __/ _ \
+ | |  | | (_| \__ \\  /  | | |_) | | | (_| | ||  __/
+ |_|  |_|\__,_|___/ \/   |_|_.__/|_|  \__,_|\__\___|
+ Made by: WunderMaschine
+]]
+
+local readmeVersion = require(script:WaitForChild("README"))
 
 local MasVibrate = {}
 
 --[]--[]-- SETTINGS --[]--[]--
 MasVibrate.Settings = {
-    Enabled = true,
-    DefaultIntensity = 1,
-    DefaultDuration = 0.5,
-    MinIntensity = 0.1,
-    MaxIntensity = 10,
-    IntensityStep = 0.1,
+    Enabled = true,          -- Master switch to enable/disable all vibrations
+    DefaultIntensity = 1,    -- Used if no intensity is specified
+    DefaultDuration = 0.5,   -- Used if no duration is specified
+    MinIntensity = 0.1,      -- Lower clamp for any custom intensity
+    MaxIntensity = 10,       -- Upper clamp for any custom intensity
+    IntensityStep = 0.1,     -- Can be used by UIs or incremental adjustments
 
-    SmoothingEnabled = false,
-    SmoothingSpeed = 0.05,
-    FadeInEnabled = false,
-    FadeInDuration = 0.2,
-    FadeOutEnabled = false,
-    FadeOutDuration = 0.3,
-    PatternSpeed = 1,
-
-    Sound = {
-        Enabled = true,
-        Sensitivity = 1,
-        MusicResponse = 1
-    },
+    SmoothingEnabled = false,-- If true, uses a smooth transition approach
+    SmoothingSpeed = 0.05,   -- Speed factor for smoothing transitions
+    FadeInEnabled = false,   -- If true, adds a fade-in effect
+    FadeInDuration = 0.2,    -- Duration for fade-in
+    FadeOutEnabled = false,  -- If true, adds a fade-out effect
+    FadeOutDuration = 0.3,   -- Duration for fade-out
+    PatternSpeed = 1,        -- Speed multiplier for pattern-based vibrations
 
     Balance = {
-        Enabled = true,
-        Intensity = 1,
-        Sway = 0.5
-    },
-
-    Character = {
-        Enabled = true,
-        JumpIntensity = 1,
-        DamageIntensity = 2,
-        FallIntensity = 1
+        Enabled = true,  -- Splits intensity across left and right motors if true
+        Intensity = 1,   -- Extra factor applied to balanced intensities
+        Sway = 0.5       -- 0 = all left motor, 1 = all right motor, 0.5 = equal split
     }
 }
 
 local Modules = require(script.Parent.Modules)
 
+--[]--[]-- CONFIGURE --[]--[]--
 function MasVibrate:Configure(settingsTable)
     for k, v in pairs(settingsTable) do
         if self.Settings[k] ~= nil then
@@ -55,6 +48,7 @@ function MasVibrate:Configure(settingsTable)
     warn("[MasVibrate] Configure called.")
 end
 
+--[]--[]-- VIBRATE --[]--[]--
 function MasVibrate:Vibrate(intensity, duration)
     if not self.Settings.Enabled then
         warn("[MasVibrate] Vibrations are disabled.")
@@ -63,34 +57,42 @@ function MasVibrate:Vibrate(intensity, duration)
     intensity = intensity or self.Settings.DefaultIntensity
     duration = duration or self.Settings.DefaultDuration
 
-    intensity = math.clamp(intensity, self.Settings.MinIntensity, self.Settings.MaxIntensity)
-    Modules:Apply(intensity, duration)
+    -- Make sure intensity is within the user-defined range.
+    if intensity < self.Settings.MinIntensity then
+        intensity = self.Settings.MinIntensity
+    elseif intensity > self.Settings.MaxIntensity then
+        intensity = self.Settings.MaxIntensity
+    end
+
+    Modules:Apply(intensity, duration, self.Settings)
     warn("[MasVibrate] Vibrate called. Intensity:", intensity, "Duration:", duration)
 end
 
+--[]--[]-- STOP --[]--[]--
 function MasVibrate:Stop()
     Modules:Stop()
     warn("[MasVibrate] Stop called.")
 end
 
--- Example stubs for custom patterns, fade, etc.
+--[]--[]-- CUSTOM PATTERNS --[]--[]--
 function MasVibrate:CustomVibration(pattern, customData)
     if self.Settings.Enabled then
-        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration)
+        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings)
     end
-    warn("[MasVibrate] CustomVibration called. Pattern:", pattern, "Data:", customData)
+    warn("[MasVibrate] CustomVibration. Pattern:", pattern, "Data:", customData)
 end
 
 function MasVibrate:PatternVibration(pattern, speed)
     if self.Settings.Enabled then
-        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration)
+        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings)
     end
-    warn("[MasVibrate] PatternVibration called. Pattern:", pattern, "Speed:", speed)
+    warn("[MasVibrate] PatternVibration. Pattern:", pattern, "Speed:", speed)
 end
 
+--[]--[]-- FADE --[]--[]--
 function MasVibrate:FadeIn(intensity, duration)
     if self.Settings.Enabled and self.Settings.FadeInEnabled then
-        Modules:Apply(intensity, duration)
+        Modules:Apply(intensity, duration, self.Settings)
     end
     warn("[MasVibrate] FadeIn. Intensity:", intensity, "Duration:", duration)
 end
@@ -103,8 +105,6 @@ function MasVibrate:FadeOut(duration)
     end
     warn("[MasVibrate] FadeOut. Duration:", duration)
 end
-
--- We removed Sound & Character direct calls; they're now separate plugins.
 
 --[]--[]-- PLUGIN HANDLER --[]--[]--
 function MasVibrate:Plugin(pluginName, command, ...)
