@@ -2,20 +2,20 @@ local PluginCharacter = {}
 
 PluginCharacter.Settings = {
     Enabled = true,
-    JumpIntensity = 1,
-    DamageIntensity = 2,
-    FallIntensity = 1
+    JumpIntensity = 1.5,
+    DamageIntensity = 2.5,
+    FallIntensity = 1.5
 }
 
 PluginCharacter.Config = {
-    JumpScale = 100,
-    DamageScale = 50,
-    BaseDamageDuration = 0.2,
-    DamageDurationScale = 150,
-    FallScale = 20,
-    BaseFallDuration = 0.2,
-    FallDurationScale = 50,
-    BaseOverallDuration = 0.3
+    JumpScale = 50,            -- Lower scale => higher sensitivity for jump
+    DamageScale = 25,          -- Lower scale => higher sensitivity for damage
+    BaseDamageDuration = 0.05, -- Short base duration for damage
+    DamageDurationScale = 50,  -- Increases duration based on rawValue, still short overall
+    FallScale = 20,            -- Sensitivity for fall
+    BaseFallDuration = 0.05,   -- Short base duration for fall
+    FallDurationScale = 50,    -- Increases duration based on rawValue, still short overall
+    BaseOverallDuration = 0.1  -- Very short default
 }
 
 local Modules = require(script.Parent.Parent.Modules)
@@ -37,13 +37,16 @@ function PluginCharacter:Trigger(pluginData)
             self.Settings.FallIntensity = pluginData.Settings.FallIntensity
         end
     end
+
     if not self.Settings.Enabled then
         return
     end
+
     local allSettings = pluginData.MasVibrateSettings
     if not allSettings then
         return
     end
+
     local eventName = pluginData.EventName
     local rawValue = pluginData.Value or 0
     local intensity = 0

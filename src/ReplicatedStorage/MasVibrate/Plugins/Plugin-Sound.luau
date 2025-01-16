@@ -2,15 +2,15 @@ local PluginSound = {}
 
 PluginSound.Settings = {
     Enabled = true,
-    Sensitivity = 1,
-    MusicResponse = 1
+    Sensitivity = 2,
+    MusicResponse = 2
 }
 
 PluginSound.Config = {
     DefaultVolume = 1,
-    VolumeScale = 10,
-    BaseDuration = 0.3,
-    ExtraDurationScale = 50
+    VolumeScale = 5,
+    BaseDuration = 0.1,
+    ExtraDurationScale = 25
 }
 
 local Modules = require(script.Parent.Parent.Modules)
@@ -29,20 +29,26 @@ function PluginSound:Trigger(pluginData)
             self.Settings.MusicResponse = pluginData.Settings.MusicResponse
         end
     end
+
     if not self.Settings.Enabled then
         return
     end
+
     local allSettings = pluginData.MasVibrateSettings
     if not allSettings then
         return
     end
+
     local volume = pluginData.Volume or self.Config.DefaultVolume
     local baseIntensity = (volume / self.Config.VolumeScale)
         * self.Settings.Sensitivity
         * self.Settings.MusicResponse
     local intensity = math.clamp(baseIntensity, allSettings.MinIntensity, allSettings.MaxIntensity)
     local duration = self.Config.BaseDuration + (volume / self.Config.ExtraDurationScale)
-    Modules:Apply(intensity, duration, allSettings)
+    local motorChoice = pluginData.MotorChoice or "both"
+
+    Modules:Apply(intensity, duration, allSettings, motorChoice)
+
     activeDelay = task.delay(duration, function()
         self:Stop()
     end)

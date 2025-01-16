@@ -36,7 +36,8 @@ MasVibrate.Settings = {
     }
 }
 
-local Modules = require(script.Parent.Modules)
+--[]--[]-- DEPENDENCIES --[]--[]--
+local Modules = require(script:WaitForChild('Modules'))
 
 --[]--[]-- CONFIGURE --[]--[]--
 function MasVibrate:Configure(settingsTable)
@@ -45,56 +46,47 @@ function MasVibrate:Configure(settingsTable)
             self.Settings[k] = v
         end
     end
-    warn("[MasVibrate] Configure called.")
 end
 
 --[]--[]-- VIBRATE --[]--[]--
-function MasVibrate:Vibrate(intensity, duration)
+function MasVibrate:Vibrate(intensity, duration, motorChoice)
     if not self.Settings.Enabled then
         warn("[MasVibrate] Vibrations are disabled.")
         return
     end
     intensity = intensity or self.Settings.DefaultIntensity
     duration = duration or self.Settings.DefaultDuration
-
-    -- Make sure intensity is within the user-defined range.
     if intensity < self.Settings.MinIntensity then
         intensity = self.Settings.MinIntensity
     elseif intensity > self.Settings.MaxIntensity then
         intensity = self.Settings.MaxIntensity
     end
-
-    Modules:Apply(intensity, duration, self.Settings)
-    warn("[MasVibrate] Vibrate called. Intensity:", intensity, "Duration:", duration)
+    Modules:Apply(intensity, duration, self.Settings, motorChoice)
 end
 
 --[]--[]-- STOP --[]--[]--
 function MasVibrate:Stop()
     Modules:Stop()
-    warn("[MasVibrate] Stop called.")
 end
 
 --[]--[]-- CUSTOM PATTERNS --[]--[]--
-function MasVibrate:CustomVibration(pattern, customData)
+function MasVibrate:CustomVibration(pattern, customData, motorChoice)
     if self.Settings.Enabled then
-        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings)
+        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings, motorChoice)
     end
-    warn("[MasVibrate] CustomVibration. Pattern:", pattern, "Data:", customData)
 end
 
-function MasVibrate:PatternVibration(pattern, speed)
+function MasVibrate:PatternVibration(pattern, speed, motorChoice)
     if self.Settings.Enabled then
-        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings)
+        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings, motorChoice)
     end
-    warn("[MasVibrate] PatternVibration. Pattern:", pattern, "Speed:", speed)
 end
 
 --[]--[]-- FADE --[]--[]--
-function MasVibrate:FadeIn(intensity, duration)
+function MasVibrate:FadeIn(intensity, duration, motorChoice)
     if self.Settings.Enabled and self.Settings.FadeInEnabled then
-        Modules:Apply(intensity, duration, self.Settings)
+        Modules:Apply(intensity, duration, self.Settings, motorChoice)
     end
-    warn("[MasVibrate] FadeIn. Intensity:", intensity, "Duration:", duration)
 end
 
 function MasVibrate:FadeOut(duration)
@@ -103,7 +95,6 @@ function MasVibrate:FadeOut(duration)
             Modules:Stop()
         end)
     end
-    warn("[MasVibrate] FadeOut. Duration:", duration)
 end
 
 --[]--[]-- PLUGIN HANDLER --[]--[]--
@@ -114,7 +105,7 @@ function MasVibrate:Plugin(pluginName, command, ...)
     elseif pluginName:match("^Plugin/") then
         actualName = pluginName:gsub("^Plugin/", "")
     end
-    warn("[MasVibrate] Plugin invoked. Name:", actualName, "Command:", command, "Vars:", ...)
+    -- warn("[MasVibrate] Plugin invoked. Name:", actualName, "Command:", command, "Vars:", ...)
 end
 
 return MasVibrate

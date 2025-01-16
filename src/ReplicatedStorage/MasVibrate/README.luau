@@ -60,7 +60,15 @@ Below is an overview of how each part works, presented clearly so you can adapt 
 
 • Trigger vibration:
   MasVibrate:Vibrate(3, 1)
-  -- Vibrates at intensity 3 for 1 second.
+  -- Vibrates at intensity 3 for 1 second (both motors by default).
+
+• Select a specific motor:
+  MasVibrate:Vibrate(3, 1, "small")
+  -- Vibrates only the small motor at intensity 3 for 1 second.
+  MasVibrate:Vibrate(3, 1, "large")
+  -- Vibrates only the large motor.
+  MasVibrate:Vibrate(3, 1, "both")
+  -- Vibrates both motors.
 
 • Stop vibration:
   MasVibrate:Stop()
@@ -117,4 +125,4 @@ EasyVibration's github link: https://github.com/WunderMaschine/EasyVibration
 --------------------------------------------------------------------------------
 --]]
 
-return 'V0.1'
+return 'V0.2'
