@@ -8,14 +8,14 @@ PluginCharacter.Settings = {
 }
 
 PluginCharacter.Config = {
-    JumpScale = 50,            -- Lower scale => higher sensitivity for jump
-    DamageScale = 25,          -- Lower scale => higher sensitivity for damage
-    BaseDamageDuration = 0.05, -- Short base duration for damage
-    DamageDurationScale = 50,  -- Increases duration based on rawValue, still short overall
-    FallScale = 20,            -- Sensitivity for fall
-    BaseFallDuration = 0.05,   -- Short base duration for fall
-    FallDurationScale = 50,    -- Increases duration based on rawValue, still short overall
-    BaseOverallDuration = 0.1  -- Very short default
+    JumpScale = 50,
+    DamageScale = 25,
+    BaseDamageDuration = 0.05,
+    DamageDurationScale = 50,
+    FallScale = 20,
+    BaseFallDuration = 0.05,
+    FallDurationScale = 50,
+    BaseOverallDuration = 0.1
 }
 
 local Modules = require(script.Parent.Parent.Modules)
@@ -74,8 +74,9 @@ end
 
 function PluginCharacter:Stop()
     if activeDelay then
-        task.cancel(activeDelay)
+        local temp = activeDelay
         activeDelay = nil
+        task.cancel(temp)
     end
     Modules:Stop()
 end
