@@ -2,22 +2,22 @@ local PluginSound = {}
 
 PluginSound.Settings = {
     Enabled = true,
-    Sensitivity = 2,
-    MusicResponse = 2
+    Sensitivity = 1,
+    MusicResponse = 1
 }
 
 PluginSound.Config = {
-    DefaultVolume = 1,
-    VolumeScale = 5,
-    BaseDuration = 0.1,
-    ExtraDurationScale = 25
+    DefaultHeight = 1,
+    HeightScale = 10,
+    BaseDuration = 0.3,
+    ExtraDurationScale = 50
 }
 
 local Modules = require(script.Parent.Parent.Modules)
-local activeDelay
 
 function PluginSound:Trigger(pluginData)
     self:Stop()
+
     if pluginData and pluginData.Settings then
         if pluginData.Settings.Enabled ~= nil then
             self.Settings.Enabled = pluginData.Settings.Enabled
@@ -39,27 +39,19 @@ function PluginSound:Trigger(pluginData)
         return
     end
 
-    local volume = pluginData.Volume or self.Config.DefaultVolume
-    local baseIntensity = (volume / self.Config.VolumeScale)
+    local height = pluginData.Height or self.Config.DefaultHeight
+    local baseIntensity = (height / self.Config.HeightScale)
         * self.Settings.Sensitivity
         * self.Settings.MusicResponse
     local intensity = math.clamp(baseIntensity, allSettings.MinIntensity, allSettings.MaxIntensity)
-    local duration = self.Config.BaseDuration + (volume / self.Config.ExtraDurationScale)
+    local duration = self.Config.BaseDuration + (height / self.Config.ExtraDurationScale)
     local motorChoice = pluginData.MotorChoice or "both"
 
-    Modules:Apply(intensity, duration, allSettings, motorChoice)
-
-    activeDelay = task.delay(duration, function()
-        self:Stop()
-    end)
+    Modules:Apply(intensity, duration, allSettings, motorChoice, "Sound")
 end
 
 function PluginSound:Stop()
-    if activeDelay then
-        task.cancel(activeDelay)
-        activeDelay = nil
-    end
-    Modules:Stop()
+    Modules:Stop("Sound")
 end
 
 return PluginSound

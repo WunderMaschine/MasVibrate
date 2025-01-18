@@ -7,6 +7,10 @@
       "$path": "src/ReplicatedStorage"
     },
 
+    "StarterGui": {
+      "$path": "src/StarterGui"
+    },
+
 
     "StarterPlayer": {
       "StarterCharacterScripts": {

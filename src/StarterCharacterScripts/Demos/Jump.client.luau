@@ -1,45 +1,51 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
 local MasVibrate = require(game:GetService("ReplicatedStorage"):WaitForChild("MasVibrate"))
 
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
+local function setupCharacter(char)
+    local humanoid = char:WaitForChild("Humanoid")
+    local rootPart = char:WaitForChild("HumanoidRootPart")
 
-local fallStartY = nil
-local wasFalling = false
+    local wasInAir = false
+    local fallStartY = 0
 
--- Jump event
-humanoid.Jumping:Connect(function(isActive)
-    if isActive then
-        local jumpPower = humanoid.JumpPower or 50
-        MasVibrate:Plugin("Character", "Trigger", {
-            EventName = "Jump",
-            Value = jumpPower,
-            MasVibrateSettings = MasVibrate.Settings
-        })
-    end
-end)
-
--- Fall event
-humanoid.StateChanged:Connect(function(oldState, newState)
-    if newState == Enum.HumanoidStateType.Freefall then
-        fallStartY = rootPart.Position.Y
-        wasFalling = true
-    elseif wasFalling then
-        if newState == Enum.HumanoidStateType.Landed
-        or newState == Enum.HumanoidStateType.Running
-        or newState == Enum.HumanoidStateType.Walking
-        or newState == Enum.HumanoidStateType.RunningNoPhysics
-        or newState == Enum.HumanoidStateType.Seated
-        then
-            wasFalling = false
-            local fallDistance = math.abs(rootPart.Position.Y - (fallStartY or rootPart.Position.Y))
+    humanoid.Jumping:Connect(function(isActive)
+        if isActive then
+            local jumpPower = humanoid.JumpPower or 50
             MasVibrate:Plugin("Character", "Trigger", {
-                EventName = "Fall",
-                Value = fallDistance,
+                EventName = "Jump",
+                Value = jumpPower,
                 MasVibrateSettings = MasVibrate.Settings
             })
         end
-    end
-end)
+    end)
+
+    humanoid:GetPropertyChangedSignal("FloorMaterial"):Connect(function()
+        local currentMat = humanoid.FloorMaterial
+        if currentMat == Enum.Material.Air then
+            wasInAir = true
+            fallStartY = rootPart.Position.Y
+        else
+            if wasInAir then
+                wasInAir = false
+                local dist = math.abs(rootPart.Position.Y - fallStartY)
+                if dist > 0.5 then
+                    MasVibrate:Plugin("Character", "Trigger", {
+                        EventName = "Fall",
+                        Value = dist,
+                        MasVibrateSettings = MasVibrate.Settings
+                    })
+                end
+            end
+        end
+    end)
+end
+
+local function onCharacterAdded(char)
+    setupCharacter(char)
+end
+
+local initialChar = player.Character or player.CharacterAdded:Wait()
+onCharacterAdded(initialChar)
+
+player.CharacterAdded:Connect(onCharacterAdded)

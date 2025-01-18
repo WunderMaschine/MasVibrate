@@ -4,7 +4,19 @@ local HapticService = game:GetService("HapticService")
 local Compressor = require(script:WaitForChild("Compressor"))
 local Balance = require(script:WaitForChild("Balance"))
 
-local activeDelay
+local channels = {}
+
+local function getChannel(name)
+    local n = name or "Default"
+    if not channels[n] then
+        channels[n] = {
+            leftIntensity = 0,
+            rightIntensity = 0,
+            activeDelay = nil
+        }
+    end
+    return channels[n]
+end
 
 local function stopMotors()
     if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small) then
@@ -15,48 +27,80 @@ local function stopMotors()
     end
 end
 
-function Modules:Apply(intensity, duration, masVibrateSettings, motorChoice)
-    self:Stop()
-
-    if not intensity or not duration or not masVibrateSettings then
-        return
+local function updateMotorsFromChannels()
+    local totalLeft = 0
+    local totalRight = 0
+    for _, ch in pairs(channels) do
+        totalLeft += ch.leftIntensity
+        totalRight += ch.rightIntensity
     end
 
-    Compressor:CompressAll(masVibrateSettings)
-
-    if masVibrateSettings.Balance and masVibrateSettings.Balance.Enabled then
-        Balance:ApplyBalance(masVibrateSettings, intensity, duration, motorChoice)
+    if totalLeft == 0 and totalRight == 0 then
+        stopMotors()
     else
-        local choice = (motorChoice or "both"):lower()
-        local finalSmall = intensity
-        local finalLarge = intensity
-
-        if choice == "s" or choice == "small" then
-            finalLarge = 0
-        elseif choice == "l" or choice == "large" then
-            finalSmall = 0
-        end
-
         if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small) then
-            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, finalSmall)
+            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, totalLeft)
         end
         if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large) then
-            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large, finalLarge)
+            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large, totalRight)
         end
-
-        activeDelay = task.delay(duration, function()
-            stopMotors()
-            activeDelay = nil
-        end)
     end
 end
 
-function Modules:Stop()
-    if activeDelay then
-        task.cancel(activeDelay)
-        activeDelay = nil
+function Modules:Apply(intensity, duration, settings, motorChoice, channelName)
+    local ch = getChannel(channelName)
+    if ch.activeDelay then
+        task.cancel(ch.activeDelay)
+        ch.activeDelay = nil
     end
-    stopMotors()
+
+    if not (intensity and duration and settings and settings.Enabled) then
+        ch.leftIntensity = 0
+        ch.rightIntensity = 0
+        updateMotorsFromChannels()
+        return
+    end
+
+    Compressor:CompressAll(settings)
+    local c = (motorChoice or "both"):lower()
+
+    if settings.Balance and settings.Balance.Enabled then
+        local left, right = Balance:Calculate(settings, intensity, c)
+        ch.leftIntensity = left
+        ch.rightIntensity = right
+    else
+        local s = intensity
+        local l = intensity
+        if c == "s" or c == "small" then
+            l = 0
+        elseif c == "l" or c == "large" then
+            s = 0
+        end
+        ch.leftIntensity = s
+        ch.rightIntensity = l
+    end
+
+    updateMotorsFromChannels()
+
+    ch.activeDelay = task.delay(duration, function()
+        ch.leftIntensity = 0
+        ch.rightIntensity = 0
+        ch.activeDelay = nil
+        updateMotorsFromChannels()
+    end)
+end
+
+function Modules:Stop(channelName)
+    local ch = channels[channelName or "Default"]
+    if ch then
+        if ch.activeDelay then
+            task.cancel(ch.activeDelay)
+            ch.activeDelay = nil
+        end
+        ch.leftIntensity = 0
+        ch.rightIntensity = 0
+    end
+    updateMotorsFromChannels()
 end
 
 return Modules

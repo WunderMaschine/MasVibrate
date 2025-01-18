@@ -1,12 +1,12 @@
---[[
+--[[ Made by: WunderMaschine
   __  __        __      ___ _               _       
  |  \/  |       \ \    / (_) |             | |      
  | \  / | __ _ __\ \  / / _| |__  _ __ __ _| |_ ___ 
  | |\/| |/ _` / __\ \/ / | | '_ \| '__/ _` | __/ _ \
  | |  | | (_| \__ \\  /  | | |_) | | | (_| | ||  __/
  |_|  |_|\__,_|___/ \/   |_|_.__/|_|  \__,_|\__\___|
- Made by: WunderMaschine
-]]
+
+!!! Please read the README file and the documantations on GitHub before using this module !!!]]
 
 local readmeVersion = require(script:WaitForChild("README"))
 
@@ -30,7 +30,7 @@ MasVibrate.Settings = {
     PatternSpeed = 1,
 
     Balance = {
-        Enabled = true,
+        Enabled = false,
         Intensity = 1,
         Sway = 0.5
     }
@@ -49,7 +49,8 @@ function MasVibrate:Configure(settingsTable)
 end
 
 --[]--[]-- VIBRATE --[]--[]--
-function MasVibrate:Vibrate(intensity, duration, motorChoice)
+-- Added optional channelName so multiple channels can coexist.
+function MasVibrate:Vibrate(intensity, duration, motorChoice, channelName)
     if not self.Settings.Enabled then
         warn("[MasVibrate] Vibrations are disabled.")
         return
@@ -61,38 +62,39 @@ function MasVibrate:Vibrate(intensity, duration, motorChoice)
     elseif intensity > self.Settings.MaxIntensity then
         intensity = self.Settings.MaxIntensity
     end
-    Modules:Apply(intensity, duration, self.Settings, motorChoice)
+    Modules:Apply(intensity, duration, self.Settings, motorChoice, channelName)
 end
 
 --[]--[]-- STOP --[]--[]--
-function MasVibrate:Stop()
-    Modules:Stop()
+-- Also supports optional channelName to only stop a specific channel.
+function MasVibrate:Stop(channelName)
+    Modules:Stop(channelName)
 end
 
 --[]--[]-- CUSTOM PATTERNS --[]--[]--
-function MasVibrate:CustomVibration(pattern, customData, motorChoice)
+function MasVibrate:CustomVibration(pattern, customData, motorChoice, channelName)
     if self.Settings.Enabled then
-        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings, motorChoice)
+        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings, motorChoice, channelName)
     end
 end
 
-function MasVibrate:PatternVibration(pattern, speed, motorChoice)
+function MasVibrate:PatternVibration(pattern, speed, motorChoice, channelName)
     if self.Settings.Enabled then
-        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings, motorChoice)
+        Modules:Apply(self.Settings.DefaultIntensity, self.Settings.DefaultDuration, self.Settings, motorChoice, channelName)
     end
 end
 
 --[]--[]-- FADE --[]--[]--
-function MasVibrate:FadeIn(intensity, duration, motorChoice)
+function MasVibrate:FadeIn(intensity, duration, motorChoice, channelName)
     if self.Settings.Enabled and self.Settings.FadeInEnabled then
-        Modules:Apply(intensity, duration, self.Settings, motorChoice)
+        Modules:Apply(intensity, duration, self.Settings, motorChoice, channelName)
     end
 end
 
-function MasVibrate:FadeOut(duration)
+function MasVibrate:FadeOut(duration, channelName)
     if self.Settings.Enabled and self.Settings.FadeOutEnabled then
         task.delay(duration, function()
-            Modules:Stop()
+            Modules:Stop(channelName)
         end)
     end
 end

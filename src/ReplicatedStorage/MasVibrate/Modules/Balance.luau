@@ -1,15 +1,12 @@
 local Balance = {}
 local Compressor = require(script.Parent.Compressor)
-local HapticService = game:GetService("HapticService")
 
-local activeDelay
-
-function Balance:ApplyBalance(masVibrateSettings, intensity, duration, motorChoice)
+function Balance:Calculate(masVibrateSettings, intensity, motorChoice)
     if not masVibrateSettings
         or not masVibrateSettings.Balance
         or not masVibrateSettings.Balance.Enabled
     then
-        return
+        return intensity, intensity
     end
 
     Compressor:CompressAll(masVibrateSettings)
@@ -29,35 +26,7 @@ function Balance:ApplyBalance(masVibrateSettings, intensity, duration, motorChoi
         leftIntensity = 0
     end
 
-    if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small) then
-        HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, leftIntensity)
-    end
-    if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large) then
-        HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large, rightIntensity)
-    end
-
-    activeDelay = task.delay(duration, function()
-        if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small) then
-            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, 0)
-        end
-        if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large) then
-            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large, 0)
-        end
-        activeDelay = nil
-    end)
-end
-
-function Balance:Stop()
-    if activeDelay then
-        task.cancel(activeDelay)
-        activeDelay = nil
-    end
-    if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small) then
-        HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, 0)
-    end
-    if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large) then
-        HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large, 0)
-    end
+    return leftIntensity, rightIntensity
 end
 
 return Balance

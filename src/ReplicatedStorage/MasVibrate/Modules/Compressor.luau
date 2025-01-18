@@ -1,119 +1,94 @@
 local Compressor = {}
 
-local function clampValue(value, minVal, maxVal)
-    if value < minVal then
-        return minVal
-    elseif value > maxVal then
-        return maxVal
+local function clampValue(v, mn, mx)
+    if v < mn then
+        return mn
+    elseif v > mx then
+        return mx
     end
-    return value
+    return v
 end
 
-local function ensureMinMax(settings)
-    if settings.MinIntensity > settings.MaxIntensity then
-        local temp = settings.MinIntensity
-        settings.MinIntensity = settings.MaxIntensity
-        settings.MaxIntensity = temp
-    end
-end
-
-local function isBoolean(value)
-    return type(value) == "boolean"
-end
-
-local function isNumber(value)
-    return type(value) == "number"
-end
-
-local function handleUnknownKeys(settings, validKeys)
-    for key in pairs(settings) do
-        if not validKeys[key] then
-            -- warn("[Compressor] Unknown key detected:", key)
-        end
+local function ensureMinMax(s)
+    if s.MinIntensity > s.MaxIntensity then
+        local tmp = s.MinIntensity
+        s.MinIntensity = s.MaxIntensity
+        s.MaxIntensity = tmp
     end
 end
 
-local function checkBalanceTable(balanceTable)
-    if type(balanceTable) ~= "table" then
+local function isBoolean(x)
+    return type(x) == "boolean"
+end
+
+local function isNumber(x)
+    return type(x) == "number"
+end
+
+local function checkBalanceTable(tbl)
+    if type(tbl) ~= "table" then
         return {
             Enabled = true,
             Intensity = 1,
             Sway = 0.5
         }
     end
-    return balanceTable
+    return tbl
 end
 
-function Compressor:CheckGeneral(settings)
-    ensureMinMax(settings)
-    if not isBoolean(settings.Enabled) then
-        settings.Enabled = false
+function Compressor:CheckGeneral(s)
+    ensureMinMax(s)
+    if not isBoolean(s.Enabled) then
+        s.Enabled = false
     end
-    settings.DefaultIntensity = clampValue(settings.DefaultIntensity, settings.MinIntensity, settings.MaxIntensity)
-    settings.DefaultDuration = math.max(settings.DefaultDuration, 0)
-    if not isBoolean(settings.SmoothingEnabled) then
-        settings.SmoothingEnabled = false
+    s.DefaultIntensity = clampValue(s.DefaultIntensity, s.MinIntensity, s.MaxIntensity)
+    s.DefaultDuration = math.max(s.DefaultDuration, 0)
+    if not isBoolean(s.SmoothingEnabled) then
+        s.SmoothingEnabled = false
     end
-    if not isNumber(settings.SmoothingSpeed) then
-        settings.SmoothingSpeed = 0.05
+    if not isNumber(s.SmoothingSpeed) then
+        s.SmoothingSpeed = 0.05
     else
-        settings.SmoothingSpeed = math.max(settings.SmoothingSpeed, 0)
+        s.SmoothingSpeed = math.max(s.SmoothingSpeed, 0)
     end
-    if not isBoolean(settings.FadeInEnabled) then
-        settings.FadeInEnabled = false
+    if not isBoolean(s.FadeInEnabled) then
+        s.FadeInEnabled = false
     end
-    settings.FadeInDuration = clampValue(settings.FadeInDuration, 0, settings.DefaultDuration)
-    if not isBoolean(settings.FadeOutEnabled) then
-        settings.FadeOutEnabled = false
+    s.FadeInDuration = clampValue(s.FadeInDuration, 0, s.DefaultDuration)
+    if not isBoolean(s.FadeOutEnabled) then
+        s.FadeOutEnabled = false
     end
-    settings.FadeOutDuration = clampValue(settings.FadeOutDuration, 0, settings.DefaultDuration)
-    if not isNumber(settings.PatternSpeed) then
-        settings.PatternSpeed = 1
+    s.FadeOutDuration = clampValue(s.FadeOutDuration, 0, s.DefaultDuration)
+    if not isNumber(s.PatternSpeed) then
+        s.PatternSpeed = 1
     else
-        settings.PatternSpeed = math.max(settings.PatternSpeed, 0)
+        s.PatternSpeed = math.max(s.PatternSpeed, 0)
     end
-    local validKeys = {
-        Enabled = true,
-        DefaultIntensity = true,
-        DefaultDuration = true,
-        MinIntensity = true,
-        MaxIntensity = true,
-        IntensityStep = true,
-        SmoothingEnabled = true,
-        SmoothingSpeed = true,
-        FadeInEnabled = true,
-        FadeInDuration = true,
-        FadeOutEnabled = true,
-        FadeOutDuration = true,
-        PatternSpeed = true,
-        Balance = true
-    }
-    handleUnknownKeys(settings, validKeys)
 end
 
-function Compressor:CheckBalanceData(balanceSettings)
-    if not balanceSettings.Enabled then
+function Compressor:CheckBalanceData(b)
+    if not b.Enabled then
         return
     end
-    if not isNumber(balanceSettings.Intensity) then
-        balanceSettings.Intensity = 1
+    if not isNumber(b.Intensity) then
+        b.Intensity = 1
     else
-        balanceSettings.Intensity = math.max(balanceSettings.Intensity, 0)
+        b.Intensity = math.max(b.Intensity, 0)
     end
-    if not isNumber(balanceSettings.Sway) then
-        balanceSettings.Sway = 0.5
+    if not isNumber(b.Sway) then
+        b.Sway = 0.5
     else
-        balanceSettings.Sway = math.clamp(balanceSettings.Sway, 0, 1)
+        b.Sway = math.clamp(b.Sway, 0, 1)
     end
 end
 
-function Compressor:CompressAll(masVibrateSettings)
-    if not masVibrateSettings then
+function Compressor:CompressAll(settings)
+    if not settings then
         return
     end
-    masVibrateSettings.Balance = checkBalanceTable(masVibrateSettings.Balance)
-    self:CheckGeneral(masVibrateSettings)
-    self:CheckBalanceData(masVibrateSettings.Balance)
+    settings.Balance = checkBalanceTable(settings.Balance)
+    self:CheckGeneral(settings)
+    self:CheckBalanceData(settings.Balance)
 end
 
 return Compressor
