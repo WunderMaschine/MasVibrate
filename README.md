@@ -4,7 +4,7 @@
 
 <p align="center">
   <!-- DevForum Post -->
-  <a href="https://devforum.roblox.com/t/gonna-change">
+  <a href="https://devforum.roblox.com/t/masvibrate-bring-advanced-haptic-feedback-to-your-game/3391028?u=wundermaschine">
     <img src="https://img.shields.io/badge/DevForum-Post-blue?logo=roblox" alt="DevForum Link" />
   </a>
   
