@@ -130,4 +130,4 @@ EasyVibration's GitHub Link: https://github.com/WunderMaschine/EasyVibration
 --------------------------------------------------------------------------------
 --]]
 
-return 'V1'
+return 'V1-X'

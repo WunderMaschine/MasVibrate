@@ -28,21 +28,25 @@ local function stopMotors()
 end
 
 local function updateMotorsFromChannels()
-    local totalLeft = 0
-    local totalRight = 0
+    local maxLeft = 0
+    local maxRight = 0
     for _, ch in pairs(channels) do
-        totalLeft += ch.leftIntensity
-        totalRight += ch.rightIntensity
+        if ch.leftIntensity > maxLeft then
+            maxLeft = ch.leftIntensity
+        end
+        if ch.rightIntensity > maxRight then
+            maxRight = ch.rightIntensity
+        end
     end
 
-    if totalLeft == 0 and totalRight == 0 then
+    if maxLeft == 0 and maxRight == 0 then
         stopMotors()
     else
         if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small) then
-            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, totalLeft)
+            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Small, maxLeft)
         end
         if HapticService:IsMotorSupported(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large) then
-            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large, totalRight)
+            HapticService:SetMotor(Enum.UserInputType.Gamepad1, Enum.VibrationMotor.Large, maxRight)
         end
     end
 end
@@ -101,6 +105,24 @@ function Modules:Stop(channelName)
         ch.rightIntensity = 0
     end
     updateMotorsFromChannels()
+end
+
+
+
+-- Experimental
+
+function Modules:GetTotalIntensities()
+    local maxLeft = 0
+    local maxRight = 0
+    for _, ch in pairs(channels) do
+        if ch.leftIntensity > maxLeft then
+            maxLeft = ch.leftIntensity
+        end
+        if ch.rightIntensity > maxRight then
+            maxRight = ch.rightIntensity
+        end
+    end
+    return maxLeft, maxRight
 end
 
 return Modules

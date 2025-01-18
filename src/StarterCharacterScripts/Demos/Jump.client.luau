@@ -6,8 +6,26 @@ local function setupCharacter(char)
     local humanoid = char:WaitForChild("Humanoid")
     local rootPart = char:WaitForChild("HumanoidRootPart")
 
-    local wasInAir = false
+    local wasFalling = false
     local fallStartY = 0
+    local MIN_FALL_DISTANCE = 2
+
+    humanoid.StateChanged:Connect(function(oldState, newState)
+        if newState == Enum.HumanoidStateType.Freefall then
+            wasFalling = true
+            fallStartY = rootPart.Position.Y
+        elseif wasFalling and oldState == Enum.HumanoidStateType.Freefall then
+            wasFalling = false
+            local dist = math.abs(rootPart.Position.Y - fallStartY)
+            if dist >= MIN_FALL_DISTANCE then
+                MasVibrate:Plugin("Character", "Trigger", {
+                    EventName = "Fall",
+                    Value = dist,
+                    MasVibrateSettings = MasVibrate.Settings
+                })
+            end
+        end
+    end)
 
     humanoid.Jumping:Connect(function(isActive)
         if isActive then
@@ -19,33 +37,14 @@ local function setupCharacter(char)
             })
         end
     end)
-
-    humanoid:GetPropertyChangedSignal("FloorMaterial"):Connect(function()
-        local currentMat = humanoid.FloorMaterial
-        if currentMat == Enum.Material.Air then
-            wasInAir = true
-            fallStartY = rootPart.Position.Y
-        else
-            if wasInAir then
-                wasInAir = false
-                local dist = math.abs(rootPart.Position.Y - fallStartY)
-                if dist > 0.5 then
-                    MasVibrate:Plugin("Character", "Trigger", {
-                        EventName = "Fall",
-                        Value = dist,
-                        MasVibrateSettings = MasVibrate.Settings
-                    })
-                end
-            end
-        end
-    end)
 end
 
 local function onCharacterAdded(char)
     setupCharacter(char)
 end
 
-local initialChar = player.Character or player.CharacterAdded:Wait()
-onCharacterAdded(initialChar)
+if player.Character then
+    onCharacterAdded(player.Character)
+end
 
 player.CharacterAdded:Connect(onCharacterAdded)
