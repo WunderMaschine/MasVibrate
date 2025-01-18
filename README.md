@@ -33,6 +33,11 @@
     <img src="https://img.shields.io/badge/Demo%20Source-GitHub-yellow" alt="Demo Source" />
   </a>
   
+  <!-- GitHub Wiki -->
+  <a href="https://github.com/WunderMaschine/MasVibrate/wiki">
+    <img src="https://img.shields.io/badge/GitHub%20Wiki-Documentation-blue?logo=github" alt="GitHub Wiki" />
+  </a>
+  
   <!-- Discord Server -->
   <a href="https://discord.gg/9eT6MpxgX6">
     <img src="https://img.shields.io/badge/Discord-Join%20Server-7289DA?logo=discord" alt="Discord Server" />
