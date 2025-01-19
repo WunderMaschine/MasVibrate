@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i.imgur.com/OUGbqz4.png" alt="Cool Banner" width="400" />
+  <img src="https://i.imgur.com/OUGbqz4.png" alt="Cool Banner" width="300" />
 </p>
 
 <p align="center">
@@ -93,7 +93,7 @@
 ---
 
 ## Easier Alternative: [EasyVibration](https://github.com/WunderMaschine/EasyVibration)
-If you only need a simple, single-channel approach without multi-channel logic or plugins, consider **EasyVibration** &mdash; a smaller, streamlined module for easier methods. It won’t match the full power of MasVibrate but can be sufficient for simpler projects.
+If you only need a simple, single-channel approach without multi-channel logic or plugins, consider **EasyVibration**: a smaller, streamlined module for easier methods. It won’t match the full power of MasVibrate but can be sufficient for simpler projects.
 
 ---
 
